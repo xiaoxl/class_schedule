@@ -16,7 +16,7 @@ from readfiles import read_from_file
 
 
 def main():
-    st.title("ATU MAPS Class Schedule Processor beta 0.1.1")
+    st.title("ATU MAPS Class Schedule Processor beta 0.1.2")
     
     uploaded_file = st.file_uploader("Upload Excel file", type=['xlsx', 'xls'])
     
