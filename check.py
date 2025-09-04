@@ -5,10 +5,11 @@ import openpyxl
 from openpyxl.styles import Alignment, Border, Side, PatternFill
 # from openpyxl.cell.cell import MergedCell
 from openpyxl.utils import get_column_letter
+from datetime import datetime
 
 
 # from planner import show_instructor_schedule
-from planner import (
+from conflicts import (
     check_instructor_conflicts_matrix,
     print_instructor_matrix_conflicts,
     check_room_conflicts_matrix,
@@ -25,29 +26,30 @@ daymapping = {
 
 reversedaymapping = {"M": "B", "T": "C", "W": "D", "R": "E", "F": "F"}
 
-# timemapping = {
-#     800: '8:00-8:30',
-#     830: '8:30-9:00',
-#     900: '9:00-9:30',
-#     930: '9:30-10:00',
-#     1000: '10:00-10:30',
-#     1030: '10:30-11:00',
-#     1100: '11:00-11:30',
-#     1130: '11:30-12:00',
-#     1200: '12:00-12:30',
-#     1230: '12:30-13:00',
-#     1300: '13:00-13:30',
-#     1330: '13:30-14:00',
-#     1400: '14:00-14:30',
-#     1430: '14:30-15:00',
-# }
-
 timemapping = {
-    800
-    + (i // 2) * 100
-    + 30 * (i % 2): f"{8 + (i // 2)}:{30 * (i % 2):02d}-{8 + ((i + 1) // 2)}:{30 * ((i + 1) % 2):02d}"
-    for i in range(0, 14)
+    800: '8:00-8:30',
+    830: '8:30-9:00',
+    900: '9:00-9:30',
+    930: '9:30-10:00',
+    1000: '10:00-10:30',
+    1030: '10:30-11:00',
+    1100: '11:00-11:30',
+    1130: '11:30-12:00',
+    1200: '12:00-12:30',
+    1230: '12:30-13:00',
+    1300: '13:00-13:30',
+    1330: '13:30-14:00',
+    1400: '14:00-14:30',
+    1430: '14:30-15:00',
+    1500: '15:00-15:30',
+    1530: '15:30-16:00',
+    1600: '16:00-16:30',
+    1630: '16:30-17:00',
 }
+
+
+
+timemapping = {datetime.strptime(str(k).zfill(4), '%H%M').time(): v for k, v in timemapping.items()}
 
 # daymapping = {
 #     'B2': 'Monday',
@@ -60,8 +62,10 @@ timemapping = {
 
 def time2idx(t):
     # idx = int((t-800)//100*2+np.floor(((t-800)%100)/30))
-    idx = int(((t - 800) // 100) * 2 + ((t % 100) // 30))
-    return idx
+    # idx = int(((t - 800) // 100) * 2 + ((t % 100) // 30))
+    minutes_since_8 = (t.hour - 8) * 60 + t.minute
+    return minutes_since_8 // 30
+    # return idx
 
 
 # def idx2time(idx):
@@ -82,11 +86,11 @@ def generate_table(st):
         st[f"A{idx + 3}"].alignment = Alignment(horizontal="center",
                                                 vertical="center")
         st.column_dimensions["A"].width = 15
-    st.merge_cells('A17:A18')
-    st['A17'].alignment = Alignment(wrap_text=True,
+    st.merge_cells('A21:A22')
+    st['A21'].alignment = Alignment(wrap_text=True,
                                     horizontal="center",
                                     vertical="center")
-    st['A17'] = 'Online'
+    st['A21'] = 'Online'
     return st
 
 
@@ -129,12 +133,12 @@ def add_a_course_to_a_cell(st, cells, text, color=0, border=BORDER, colors=COLOR
 
 
 def add_a_row(st, row, color=0):
-    course_text = f"{row['Subject']} {row['Number']} {row['Section']}"
-    if pd.isna(row["Building"]) or pd.isna(row["Room"]):
-        room_text = ""
-    else:
-        room_text = f"{row['Building']} {int(row['Room'])}"
-    instructor_text = f"{course_text} {room_text}"
+    instructor_text = f"{row['Subject']} {row['Number']} {row['Section']} {row['Room']}"
+    # if pd.isna(row["Building"]) or pd.isna(row["Room"]):
+    #     room_text = ""
+    # else:
+    #     room_text = f"{row['Building']} {int(row['Room'])}"
+    # instructor_text = f"{course_text} {room_text}"
     if not pd.isna(row["Meeting Days"]):
         for day in row["Meeting Days"]:
             col = reversedaymapping[day]
@@ -143,7 +147,7 @@ def add_a_row(st, row, color=0):
             cells = f"{col}{r1 + 3}:{col}{r2 + 3}"
             add_a_course_to_a_cell(st, cells, instructor_text, color)
     else:
-        rnum = 17
+        rnum = 21
         cnum = 2
         found = False
         while not found:
@@ -217,9 +221,9 @@ def add_a_row_room(st, row, color=0):
     return st
 
 
-def add_same_room(st, df, building, room):
+def add_same_room(st, df, room):
     sf = df.dropna()
-    sf = sf[(sf["Building"] == building) & (sf["Room"] == room)]
+    sf = sf[sf["Room"] == room]
     # print(sf)
     color_idx = {
         f"{r['Number']} {r['Section']}": i
@@ -231,11 +235,11 @@ def add_same_room(st, df, building, room):
 
 
 def room_excel(wb, df):
-    rooms = df[["Building", "Room"]].drop_duplicates().dropna()
+    rooms = df[["Room"]].drop_duplicates().dropna()
     for i, r in rooms.iterrows():
-        st = wb.create_sheet(f"{r['Building']} {int(r['Room'])}")
+        st = wb.create_sheet(f"{r['Room']}")
         generate_table(st)
-        add_same_room(st, df, r["Building"], r["Room"])
+        add_same_room(st, df, r["Room"])
 
 
 def instructor_excel(wb, df):
@@ -257,7 +261,7 @@ def md_instructor(df):
             section = row['Section']
             days = "Online" if pd.isna(row['Meeting Days']) else row['Meeting Days']
             time = "" if pd.isna(row['Beginning Time']) else convert_time(row['Beginning Time'])
-            room = "" if pd.isna(row['Building']) else f"{row['Building']} {int(row['Room'])}"
+            room = "" if pd.isna(row['Room']) else f"{row['Room']}"
 
             t += f"| {course} | {section} | {days} | {time} | {room} |\n"
     return t
@@ -268,7 +272,8 @@ def print_instructor(df, folder="out"):
         f.write(md_instructor(df))
 
 def convert_time(b):
-    return f"{int(b//100)}:{int(b)%100:02d}"
+    return b
+    # return f"{int(b//100)}:{int(b)%100:02d}"
 
 
 def md_time(df):
@@ -283,7 +288,7 @@ def md_time(df):
             name = row['Instructor Name']
             # days = "Online" if pd.isna(row['Meeting Days']) else row['Meeting Days']
             # time = "" if pd.isna(row['Beginning Time']) else row['Beginning Time']
-            room = "Online" if pd.isna(row['Building']) else f"{row['Building']} {int(row['Room'])}"
+            room = "Online" if pd.isna(row['Room']) else f"{row['Room']}"
 
             t += f"| {course} | {section} | {name} | {room} |\n"
     return t
@@ -313,7 +318,7 @@ def md_courses(df):
             name = row['Instructor Name']
             days = "Online" if pd.isna(row['Meeting Days']) else row['Meeting Days']
             time = "" if pd.isna(row['Beginning Time']) else convert_time(row['Beginning Time'])
-            room = "Online" if pd.isna(row['Building']) else f"{row['Building']} {int(row['Room'])}"
+            room = "Online" if pd.isna(row['Room']) else f"{row['Room']}"
 
             t += f"| {section} | {name} | {days} | {time} | {room} |\n"
     return t
@@ -333,9 +338,9 @@ def print_courses(df, folder="out"):
 
 def md_rooms(df):
     t = ""
-    for (m, b), r in df.groupby(["Building", "Room"]):
+    for (b), r in df.groupby(["Room"]):
         if not pd.isna(b):
-            t += f"# {m} {int(b)}\n"
+            t += f"# {b[0]}\n"
             t += "| Days | Time | Course | Section | Instructor |\n"
             t += "|---------|------------|------|------|------|\n"
             for _, row in r.iterrows():

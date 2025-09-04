@@ -8,15 +8,15 @@ def compute_credits(df):
     return credit_clean[['Course Credit Hours']].groupby([credit_clean['Instructor Name']]).sum()
 
 
-def show_instructor_schedule(df, names=None):
-    if isinstance(names, str):
-        return df[df['Instructor Name']==names]
-    elif isinstance(names, np.ndarray):
-        return [df[df['Instructor Name']==i] for i in names]
-    elif isinstance(names, list):
-        return [df[df['Instructor Name']==i] for i in names]
-    else:
-        return None
+# def show_instructor_schedule(df, names=None):
+#     if isinstance(names, str):
+#         return df[df['Instructor Name']==names]
+#     elif isinstance(names, np.ndarray):
+#         return [df[df['Instructor Name']==i] for i in names]
+#     elif isinstance(names, list):
+#         return [df[df['Instructor Name']==i] for i in names]
+#     else:
+#         return None
     
 
 def check_instructor_conflicts_matrix(df):
@@ -38,7 +38,6 @@ def check_instructor_conflicts_matrix(df):
     
     # Group by instructor
     for instructor, group in data.groupby('Instructor Name'):
-        # Create time-day matrix: {time_slot: {'M': count, 'T': count, ...}}
         matrix = defaultdict(lambda: {'M': 0, 'T': 0, 'W': 0, 'R': 0, 'F': 0})
         course_details = defaultdict(lambda: defaultdict(list))  # Store course info
         
