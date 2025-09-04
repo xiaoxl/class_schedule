@@ -1,5 +1,8 @@
 env/
 .devcontainer/
 __pycache__/
+test/
+out/
+src/
 planner.ipynb
 *.xlsx
