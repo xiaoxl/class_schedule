@@ -3,11 +3,16 @@ import pandas as pd
 import io
 # from datetime import datetime
 # from check import whole_package
-from check import md_courses, md_instructor, md_rooms, md_time
-from check import check_instructor_conflicts_matrix, check_room_conflicts_matrix
-from planner import md_instructor_matrix_conflicts, md_room_matrix_conflicts
 import openpyxl
 from check import room_excel, instructor_excel
+from check import md_courses, md_instructor, md_rooms, md_time
+from conflicts import (
+    check_instructor_conflicts_matrix,
+    check_room_conflicts_matrix,
+    md_instructor_matrix_conflicts,
+    md_room_matrix_conflicts
+)
+
 
 
 def main():
