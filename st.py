@@ -11,7 +11,7 @@ from check import room_excel, instructor_excel
 
 
 def main():
-    st.title("Excel File Processor")
+    st.title("ATU MAPS Class Schedule Processor")
     
     uploaded_file = st.file_uploader("Upload Excel file", type=['xlsx', 'xls'])
     
