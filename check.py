@@ -199,7 +199,10 @@ def add_a_row(st, row, color=0):
 
 def add_same_instructors(st, df, name):
     # sf = df.dropna()
-    sf = df[df["Instructor Name"] == name]  # .dropna()
+    if not pd.isna(name):
+        sf = df[df["Instructor Name"] == name]  # .dropna()
+    else:
+        sf = df[df["Instructor Name"].isna()]
     # print(sf)
     color_idx = {
         f"{r['Number']} {r['Section']}": i
@@ -245,7 +248,7 @@ def room_excel(wb, df):
 def instructor_excel(wb, df):
     names = df["Instructor Name"].drop_duplicates()
     for name in names:
-        st = wb.create_sheet(name)
+        st = wb.create_sheet(f'{name}')
         generate_table(st)
         add_same_instructors(st, df, name)
 
@@ -366,14 +369,27 @@ def print_room(df, folder="out"):
         #         )
         #     f.write("\n")
 
-
-def compute_credits(df):
+def md_compute_credits(df):
     credit_clean = (
-        df[["Instructor Name", "Subject", "Number", "Section", "Course Credit Hours"]]
+        df[["Instructor Name", "Subject", "Number", "Section", "Credits"]]
         .drop_duplicates()
         .reset_index(drop=True)
     )
-    return credit_clean[["Course Credit Hours"]].groupby([credit_clean["Instructor Name"]]).sum()
+    d = credit_clean[["Credits"]].groupby([credit_clean["Instructor Name"]]).sum().to_dict()['Credits']
+
+    t = "| Instructor | Credits |\n"
+    t += "|---------|------------|\n"
+    for k, v in d.items():
+        t += f"| {k} | {v} |\n"
+    return t
+
+def compute_credits(df):
+    credit_clean = (
+        df[["Instructor Name", "Subject", "Number", "Section", "Credits"]]
+        .drop_duplicates()
+        .reset_index(drop=True)
+    )
+    return credit_clean[["Credits"]].groupby([credit_clean["Instructor Name"]]).sum()
 
 
 def whole_package(df, folder="out"):
@@ -391,7 +407,7 @@ def whole_package(df, folder="out"):
     print_courses(df, folder)
     print_instructor(df, folder)
     print_room(df, folder)
-    # print(compute_credits(df))
+    print(compute_credits(df))
 
     if (not instructor_conflicts) and (not room_conflicts):
         wbr = openpyxl.Workbook()

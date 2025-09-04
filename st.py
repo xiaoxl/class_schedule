@@ -5,14 +5,14 @@ import io
 # from check import whole_package
 import openpyxl
 from check import room_excel, instructor_excel
-from check import md_courses, md_instructor, md_rooms, md_time
+from check import md_courses, md_instructor, md_rooms, md_time, md_compute_credits
 from conflicts import (
     check_instructor_conflicts_matrix,
     check_room_conflicts_matrix,
     md_instructor_matrix_conflicts,
     md_room_matrix_conflicts
 )
-
+from readfiles import read_from_file
 
 
 def main():
@@ -21,7 +21,7 @@ def main():
     uploaded_file = st.file_uploader("Upload Excel file", type=['xlsx', 'xls'])
     
     if uploaded_file is not None:
-        df = pd.read_excel(uploaded_file)
+        df = read_from_file(uploaded_file)
 
         instructor_conflicts = check_instructor_conflicts_matrix(df)
         ic = md_instructor_matrix_conflicts(instructor_conflicts)
@@ -31,6 +31,7 @@ def main():
         n = md_instructor(df)
         c = md_courses(df)
         r = md_rooms(df)
+        h = md_compute_credits(df)
         
         if (not instructor_conflicts) and (not room_conflicts):
             wbu = openpyxl.Workbook()
@@ -67,6 +68,7 @@ def main():
 
         tabs = st.tabs([
             "Conflicts",
+            'Credits',
             "Instructors",
             "Rooms",
             "Courses",
@@ -77,14 +79,16 @@ def main():
         with tabs[0]:
             st.markdown(f'{ic}{rc}')
         with tabs[1]:
-            st.markdown(n)
+            st.markdown(h)
         with tabs[2]:
-            st.markdown(r)
+            st.markdown(n)
         with tabs[3]:
-            st.markdown(c)
+            st.markdown(r)
         with tabs[4]:
-            st.markdown(t)
+            st.markdown(c)
         with tabs[5]:
+            st.markdown(t)
+        with tabs[6]:
             st.write("File processed successfully")
             st.write(f"Rows: {len(df)}, Columns: {len(df.columns)}")
             st.dataframe(df)

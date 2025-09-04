@@ -53,15 +53,18 @@ def read_from_ad(filename):
     sf['Beginning Time'] = df['Start Time'].apply(parse_time)
     sf['Ending Time'] = df['End Time'].apply(parse_time)
     sf['Room'] = df['Room']
+    sf['Credits'] = sf['Number'].str[-1].astype(int)
     # sf[['Building', 'Room']] = df['Room'].str.extract(r'(?P<Building>\w+) (?P<Room>\w+)')
     sf['Cross-List'] = df['Cross-List']
     sf = merge_cross_list(sf)
-    sf = sf[sf['Section'].str.match(r"^(0|M|H|F|AT|TC)")]
+    
     sf['Room'] = sf['Room'].str.strip()
     sf['Subject'] = sf['Subject'].str.strip()
-    sf['Number'] = sf['Number'].str.strip()
-    sf['Section'] = sf['Section'].str.strip()
+    sf['Number'] = sf['Number'].astype(str).str.strip()
+    sf['Section'] = sf['Section'].astype(str).str.strip()
     sf['Instructor Name'] = sf['Instructor Name'].str.strip()
+
+    sf = sf[sf['Section'].str.match(r"^(AT|TC|[0-9]|M|H|F)")]
     return sf
 
 
@@ -80,18 +83,20 @@ def read_from_argos(filename):
     sf['Beginning Time'] = df['Beginning Time'].astype(str).apply(parse_time).copy()
     sf['Ending Time'] = df['Ending Time'].astype(str).apply(parse_time).copy()
     sf['Room'] = df[["Building", "Room"]].apply(merge_building_room, axis=1).copy()
+    sf['Credits'] = df['Course Credit Hours'].copy().astype(int)
     if 'Cross-List' in df.columns:
         sf['Cross-List'] = df['Cross-List']
     else:
         sf['Cross-List'] = np.nan
     sf = merge_cross_list(sf)
-    sf = sf[sf['Section'].str.match(r"^(0|M|H|F|AT|TC)")]
+
     sf['Room'] = sf['Room'].str.strip()
     sf['Subject'] = sf['Subject'].str.strip()
-    sf['Number'] = sf['Number'].str.strip()
-    sf['Section'] = sf['Section'].str.strip()
-    sf['Number'] = sf['Number'].str.strip()
+    sf['Section'] = sf['Section'].astype(str).str.strip()
+    sf['Number'] = sf['Number'].astype(str).str.strip()
     sf['Meeting Days'] = sf['Meeting Days'].str.upper()
+
+    sf = sf[sf['Section'].str.match(r"^(0|M|H|F|AT|TC)")]
     return sf
 
 
