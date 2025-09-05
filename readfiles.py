@@ -42,8 +42,7 @@ def merge_cross_list(df):
     return df.drop(columns=['Cross-List'])
 
 
-def read_from_ad(filename):
-    df = pd.read_excel(filename)
+def read_from_ad(df):
     sf = df['Course/Section'].str.extract(r'(?P<Subject>[A-Z]+) (?P<Number>[\w-]+)/(?P<Section>\w+) (?P<Type>\w+)')
     sf = sf.drop(columns=['Type'])
     sf['Instructor Name'] = df['Instructor']
@@ -66,8 +65,7 @@ def merge_building_room(x):
     return t
 
 
-def read_from_argos(filename):
-    df = pd.read_excel(filename)
+def read_from_argos(df):
     sf = df[['Subject', 'Number', 'Section', 'Instructor Name', 'Meeting Days']].copy()
     sf['Number'] = sf['Number'].astype(str)
     sf['Beginning Time'] = df['Beginning Time'].astype(str).apply(parse_time).copy()
@@ -94,11 +92,16 @@ def clean_df(df):
     return df
 
 def read_from_file(filename):
-    df = pd.read_excel(filename)
+    fileext = filename.split('.')[-1]
+    if  fileext in ['xlsx', 'xls']:
+        df = pd.read_excel(filename)
+    elif fileext == 'csv':
+        df = pd.read_csv(filename)
+
     if 'Course/Section' in df.columns:
-        sf = read_from_ad(filename)
+        sf = read_from_ad(df)
     else:
-        sf = read_from_argos(filename)
+        sf = read_from_argos(df)
     
     return sf
 
