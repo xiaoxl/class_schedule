@@ -5,7 +5,6 @@ from datetime import datetime
 
 def parse_time(s):
     if not pd.isna(s):
-        # s = str(s)
         for fmt in ("%H:%M", "%H:%M:%S", "%I:%M %p", "%H%M", "%H%M.0"):
             try:
                 return datetime.strptime(s.zfill(4), fmt).time()
@@ -30,7 +29,6 @@ def merge_rows(df):
             else:
                 rf[c] = [f'{LL[0]}-{LL[1]}']
         else:
-            # Keep Cross-List column as is (take first value)
             rf[c] = [np.nan]
             
     return pd.DataFrame(rf)
@@ -54,7 +52,6 @@ def read_from_ad(filename):
     sf['Ending Time'] = df['End Time'].apply(parse_time)
     sf['Room'] = df['Room']
     sf['Credits'] = sf['Number'].str[-1].astype(int)
-    # sf[['Building', 'Room']] = df['Room'].str.extract(r'(?P<Building>\w+) (?P<Room>\w+)')
     sf['Cross-List'] = df['Cross-List']
     sf = merge_cross_list(sf)
     sf = clean_df(sf)

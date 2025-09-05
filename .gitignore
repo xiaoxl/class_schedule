@@ -4,5 +4,6 @@ __pycache__/
 test/
 out/
 src/
+old/
 planner.ipynb
 *.xlsx

@@ -1,13 +1,4 @@
-import pandas as pd
-import numpy as np
 from collections import defaultdict
-
-
-def compute_credits(df):
-    credit_clean = df[['Instructor Name', 'Subject', 'Number', 'Section', 'Course Credit Hours']].drop_duplicates().reset_index(drop=True)
-    return credit_clean[['Course Credit Hours']].groupby([credit_clean['Instructor Name']]).sum()
-
-
 
 def check_instructor_conflicts_matrix(df):
     """
@@ -59,17 +50,6 @@ def check_room_conflicts_matrix(df):
     """
     # Filter out online courses and missing room data
     data = df[df['Meeting Days'].notna() & df['Beginning Time'].notna() & df['Room'].notna()]
-    
-    # Convert Room to string and filter
-    # data['Room'] = data['Room'].astype(str)
-    # data = data[
-    #     (data['Building'].str.strip() != '') &
-    #     (data['Room'].str.strip() != '') &
-    #     (data['Room'].str.strip() != 'nan')
-    # ]
-    
-    # Create room identifier
-    # data['room_key'] = data['Building'].str.strip() + ' ' + data['Room'].str.strip()
     
     conflicts = []
     
@@ -155,10 +135,6 @@ def md_instructor_matrix_conflicts(conflicts):
     return t
 
 
-def print_instructor_matrix_conflicts(conflicts):
-    print(md_instructor_matrix_conflicts(conflicts))
-
-
 def md_room_matrix_conflicts(conflicts):
     """Print room conflicts in a clean format, combining same conflicts across days."""
     if not conflicts:
@@ -201,6 +177,3 @@ def md_room_matrix_conflicts(conflicts):
         
         conflict_num += 1
     return t
-
-def print_room_matrix_conflicts(conflicts):
-    print(md_room_matrix_conflicts(conflicts))

@@ -1,18 +1,10 @@
 import streamlit as st
-import pandas as pd
 import io
-# from datetime import datetime
-# from check import whole_package
 import openpyxl
-from check import room_excel, instructor_excel
-from check import md_courses, md_instructor, md_rooms, md_time, md_compute_credits
-from conflicts import (
-    check_instructor_conflicts_matrix,
-    check_room_conflicts_matrix,
-    md_instructor_matrix_conflicts,
-    md_room_matrix_conflicts
-)
+
 from readfiles import read_from_file
+from generateoutput import generate_reports, room_excel, instructor_excel
+
 
 
 def main():
@@ -23,16 +15,18 @@ def main():
     if uploaded_file is not None:
         df = read_from_file(uploaded_file)
 
-        instructor_conflicts = check_instructor_conflicts_matrix(df)
-        ic = md_instructor_matrix_conflicts(instructor_conflicts)
-        room_conflicts = check_room_conflicts_matrix(df)
-        rc = md_room_matrix_conflicts(room_conflicts)
-        t = md_time(df)
-        n = md_instructor(df)
-        c = md_courses(df)
-        r = md_rooms(df)
-        h = md_compute_credits(df)
-        
+        reports = generate_reports(df)
+
+        instructor_conflicts = reports['instructor_conflicts']
+        ic = reports['instructor_conflicts_text']
+        room_conflicts = reports['room_conflicts']
+        rc = reports['room_conflicts_text']
+        t = reports['schedule_time']
+        n = reports['schedule_instructor']
+        c = reports['schedule_course']
+        r = reports['schedule_room']
+        h = reports['instructor_credits']
+
         if (not instructor_conflicts) and (not room_conflicts):
             wbu = openpyxl.Workbook()
             wbu.remove(wbu.active)
@@ -40,7 +34,6 @@ def main():
             buffer_u = io.BytesIO()
             wbu.save(buffer_u)
             buffer_u.seek(0)
-
             
             wbr = openpyxl.Workbook()
             wbr.remove(wbr.active)
@@ -93,29 +86,6 @@ def main():
             st.write(f"Rows: {len(df)}, Columns: {len(df.columns)}")
             st.dataframe(df)
 
-
-        # with open('out/schedule_instructor.xlsx', 'rb') as f:
-        
-        #     st.download_button(
-        #         "Download Summary Report",
-        #         data=f,
-        #         file_name='schedule_instructor.xlsx',
-        #         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        #     )
-        
-
-
-
-        # Generate CSV
-        # csv_buffer = io.StringIO()
-        # df.to_csv(csv_buffer, index=False)
-        
-        # st.download_button(
-        #     "Download CSV",
-        #     data=csv_buffer.getvalue(),
-        #     file_name="processed_data.csv",
-        #     mime="text/csv"
-        # )
 
 if __name__ == "__main__":
     main()
