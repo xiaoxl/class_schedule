@@ -8,7 +8,7 @@ from generateoutput import generate_reports, room_excel, instructor_excel
 
 
 def main():
-    st.title("ATU MAPS Class Schedule Processor beta 0.1.2")
+    st.title("ATU MAPS Class Schedule Processor beta 0.2.0")
     
     uploaded_file = st.file_uploader("Upload Excel file", type=['xlsx', 'xls'])
     
