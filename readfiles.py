@@ -57,14 +57,7 @@ def read_from_ad(filename):
     # sf[['Building', 'Room']] = df['Room'].str.extract(r'(?P<Building>\w+) (?P<Room>\w+)')
     sf['Cross-List'] = df['Cross-List']
     sf = merge_cross_list(sf)
-    
-    sf['Room'] = sf['Room'].str.strip()
-    sf['Subject'] = sf['Subject'].str.strip()
-    sf['Number'] = sf['Number'].astype(str).str.strip()
-    sf['Section'] = sf['Section'].astype(str).str.strip()
-    sf['Instructor Name'] = sf['Instructor Name'].str.strip()
-
-    sf = sf[sf['Section'].str.match(r"^(AT|TC|[0-9]|M|H|F)")]
+    sf = clean_df(sf)
     return sf
 
 
@@ -89,16 +82,19 @@ def read_from_argos(filename):
     else:
         sf['Cross-List'] = np.nan
     sf = merge_cross_list(sf)
-
-    sf['Room'] = sf['Room'].str.strip()
-    sf['Subject'] = sf['Subject'].str.strip()
-    sf['Section'] = sf['Section'].astype(str).str.strip()
-    sf['Number'] = sf['Number'].astype(str).str.strip()
-    sf['Meeting Days'] = sf['Meeting Days'].str.upper()
-
-    sf = sf[sf['Section'].str.match(r"^(0|M|H|F|AT|TC)")]
+    sf = clean_df(sf)
     return sf
 
+
+def clean_df(df):
+    df['Instructor Name'] = df['Instructor Name'].str.strip()
+    df['Subject'] = df['Subject'].str.strip()
+    df['Number'] = df['Number'].astype(str).str.strip()
+    df['Section'] = df['Section'].astype(str).str.strip()
+    df['Meeting Days'] = df['Meeting Days'].str.upper()
+    df['Room'] = df['Room'].str.strip()
+    df = df[df['Section'].str.match(r"^(AT|TC|[0-9]|M|H|F)")]
+    return df
 
 def read_from_file(filename):
     df = pd.read_excel(filename)
@@ -106,6 +102,7 @@ def read_from_file(filename):
         sf = read_from_ad(filename)
     else:
         sf = read_from_argos(filename)
+    
     return sf
 
 if __name__ == '__main__':
