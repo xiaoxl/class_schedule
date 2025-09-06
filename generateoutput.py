@@ -178,12 +178,13 @@ def add_a_row_room(st, row, color=0):
 
 
 def add_same_room(st, df, room):
-    sf = df.dropna()
+    sf = df
     sf = sf[sf["Room"] == room]
     color_idx = {
         f"{r['Number']} {r['Section']}": i
         for i, r in sf[["Subject", "Number", "Section"]].drop_duplicates().reset_index().iterrows()
     }
+    # print(sf)
     for i, row in sf.iterrows():
         add_a_row_room(st, row, color_idx[f"{row['Number']} {row['Section']}"])
     return st
@@ -287,6 +288,42 @@ def md_compute_credits(df):
     return t
 
 
+def write_into_argos(df):
+    sf = df[['Subject', 'Number', 'Section', 'Credits', 'Title', 'Instructor Name', 'Meeting Days', 'Beginning Time', 'Ending Time']].copy()
+    sf = sf.rename(columns={'Credits': 'Course Credit Hours', 'Title': 'Catalog Title'})
+    sf[['Building', 'Room']] = df['Room'].str.extract(r'(?P<Building>[\w\s]+) (?P<Room>\d+)')
+    # sf[['Term Code', 'Active']] = np.nan
+    cols = [
+        'Term Code', 'Subject', 'Number', 'Section', 'Active', 'Course Credit Hours', 'Catalog Title',
+        'Instructor Name', 'Meeting Days', 'Beginning Time', 'Ending Time', 'Building', 'Room'
+    ]
+    sf = sf.reindex(columns=cols)
+    return sf
+
+
+def write_into_ad(df):
+    sf = df[['Instructor Name', 'Meeting Days', 'Beginning Time', 'Ending Time', 'Room']].copy()
+    sf['Course/Section'] = (
+        df['Subject'].fillna('').astype(str) + " " +
+        df['Number'].fillna('').astype(str) + "/" +
+        df['Section'].fillna('').astype(str) + " " +
+        df['Type'].fillna('').astype(str)
+    ).str.strip()
+    sf = sf.rename(columns={
+        'Instructor Name': 'Instructor',
+        'Meeting Days': 'Days Met',
+        'Beginning Time': 'Start Time',
+        'Ending Time': 'End Time'
+    })
+    cols = [
+        'Course/Section', 'Course Offering Id', 'Max Enrollment', 'Enrollment', 'Instructor',
+        'Days Met', 'Start Time', 'End Time', 'Start Date', 'End Date', 'Room', 'Term',
+        'Cross-List', 'Status', 'Same Time Link'
+    ]
+    sf = sf.reindex(columns=cols)
+    return sf
+
+
 def generate_reports(df):
     instructor_conflicts = check_instructor_conflicts_matrix(df)
     ic = md_instructor_matrix_conflicts(instructor_conflicts)
@@ -350,5 +387,6 @@ def save_reports(df, folder="out"):
         instructor_excel(wbu, df)
         wbu.save(Path(folder) / "schedule_instructor.xlsx")
 
+    write_into_argos(df).to_excel(Path(folder) / "schedule_argos.xlsx", index=False)
+    write_into_ad(df).to_excel(Path(folder) / "schedule_ad.xlsx", index=False)
     df.to_excel(Path(folder) / "schedule.xlsx", index=False)
-

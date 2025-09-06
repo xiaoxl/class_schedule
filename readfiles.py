@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from datetime import datetime
+from datetime import datetime, time
 
 
 def parse_time(s):
@@ -27,7 +27,12 @@ def merge_rows(df):
             elif pd.isna(LL[0]) and pd.isna(LL[1]):
                 rf[c] = [LL[0]]
             else:
-                rf[c] = [f'{LL[0]}-{LL[1]}']
+                if c == 'Beginning Time':
+                    rf[c] = min(LL[0], LL[1])
+                elif c == 'Ending Time':
+                    rf[c] = max(LL[0], LL[1])
+                else:
+                    rf[c] = [f'{LL[0]}-{LL[1]}']
         else:
             rf[c] = [np.nan]
             
@@ -44,7 +49,7 @@ def merge_cross_list(df):
 
 def read_from_ad(df):
     sf = df['Course/Section'].str.extract(r'(?P<Subject>[A-Z]+) (?P<Number>[\w-]+)/(?P<Section>\w+) (?P<Type>\w+)')
-    sf = sf.drop(columns=['Type'])
+    # sf = sf.drop(columns=['Type'])
     sf['Instructor Name'] = df['Instructor']
     sf['Meeting Days'] = df['Days Met'].str.upper()
     sf['Beginning Time'] = df['Start Time'].apply(parse_time)
@@ -52,6 +57,10 @@ def read_from_ad(df):
     sf['Room'] = df['Room']
     sf['Credits'] = sf['Number'].str[-1].astype(int)
     sf['Cross-List'] = df['Cross-List']
+    if 'Catalog Title' in df.columns:
+        sf['Title'] = df['Catalog Title']
+    else:
+        sf['Title'] = np.nan
     sf = merge_cross_list(sf)
     sf = clean_df(sf)
     return sf
@@ -76,6 +85,11 @@ def read_from_argos(df):
         sf['Cross-List'] = df['Cross-List']
     else:
         sf['Cross-List'] = np.nan
+    if 'Type' in df.columns:
+        sf['Type'] = df['Type']
+    else:
+        sf['Type'] = np.nan    
+    sf['Title'] = df['Catalog Title'].copy()
     sf = merge_cross_list(sf)
     sf = clean_df(sf)
     return sf
