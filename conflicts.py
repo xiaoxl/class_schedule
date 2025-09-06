@@ -29,6 +29,7 @@ def check_instructor_conflicts_matrix(df):
                     matrix[start_time][char] += 1
                     course_details[start_time][char].append(course_info)
         
+            
         # Check for conflicts (any cell > 1)
         for time_slot, day_counts in matrix.items():
             for day, count in day_counts.items():

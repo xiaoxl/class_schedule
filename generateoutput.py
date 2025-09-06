@@ -184,7 +184,6 @@ def add_same_room(st, df, room):
         f"{r['Number']} {r['Section']}": i
         for i, r in sf[["Subject", "Number", "Section"]].drop_duplicates().reset_index().iterrows()
     }
-    # print(sf)
     for i, row in sf.iterrows():
         add_a_row_room(st, row, color_idx[f"{row['Number']} {row['Section']}"])
     return st
@@ -195,6 +194,7 @@ def room_excel(wb, df):
     for i, r in rooms.iterrows():
         st = wb.create_sheet(f"{r['Room']}")
         generate_table(st)
+        # print(r['Room'])
         add_same_room(st, df, r["Room"])
 
 
@@ -203,6 +203,7 @@ def instructor_excel(wb, df):
     for name in names:
         st = wb.create_sheet(f'{name}')
         generate_table(st)
+        # print(name)
         add_same_instructors(st, df, name)
 
 
