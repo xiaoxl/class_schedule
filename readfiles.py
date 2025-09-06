@@ -105,8 +105,12 @@ def clean_df(df):
     df = df[df['Section'].str.match(r"^(AT|TC|[0-9]|M|H|F)")]
     return df
 
+
 def read_from_file(filename):
-    fileext = filename.split('.')[-1]
+    if isinstance(filename, str):
+        fileext = filename.split('.')[-1]
+    else:
+        fileext = filename.name.split('.')[-1]
     if  fileext in ['xlsx', 'xls']:
         df = pd.read_excel(filename)
     elif fileext == 'csv':
