@@ -118,6 +118,7 @@ def clean_df(df):
 def read_from_file(filename):
     
     fileext = os.path.splitext(str(filename))[-1].lstrip('.')
+    print(fileext)
     # if isinstance(filename, str):
     #     fileext = filename.split('.')[-1]
     # else:
