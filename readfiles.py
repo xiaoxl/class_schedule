@@ -66,11 +66,14 @@ def read_from_ad(df):
     return sf
 
 
+def roomnumber(x):
+    return int(x) if str(x).isdigit() else x
+
 def merge_building_room(x):
     if pd.isna(x['Building']):
         t = np.nan
     else:
-        t = f'{x['Building']} {int(x['Room'])}'
+        t = f'{x['Building']} {roomnumber(x['Room'])}'
     return t
 
 
@@ -80,7 +83,10 @@ def read_from_argos(df):
     sf['Beginning Time'] = df['Beginning Time'].astype(str).apply(parse_time).copy()
     sf['Ending Time'] = df['Ending Time'].astype(str).apply(parse_time).copy()
     sf['Room'] = df[["Building", "Room"]].apply(merge_building_room, axis=1).copy()
-    sf['Credits'] = df['Course Credit Hours'].copy().astype(int)
+    if 'Course Credit Hours' in df.columns:
+        sf['Credits'] = df['Course Credit Hours'].copy().astype(int)
+    else:
+        sf['Credits'] = df['Number'].astype(str).str[-1].astype(int)
     if 'Cross-List' in df.columns:
         sf['Cross-List'] = df['Cross-List']
     else:
@@ -88,8 +94,11 @@ def read_from_argos(df):
     if 'Type' in df.columns:
         sf['Type'] = df['Type']
     else:
-        sf['Type'] = np.nan    
-    sf['Title'] = df['Catalog Title'].copy()
+        sf['Type'] = np.nan
+    if 'Catalog Title' in df.columns:
+        sf['Title'] = df['Catalog Title'].copy()
+    else:
+        sf['Title'] = ''
     sf = merge_cross_list(sf)
     sf = clean_df(sf)
     return sf
@@ -124,5 +133,7 @@ def read_from_file(filename):
     return sf
 
 if __name__ == '__main__':
-    df1 = read_from_ad('src/MAPS fall 25.xlsx')
-    df2 = read_from_argos('src/schedule.xlsx')
+    # df1 = read_from_file('src/MAPS fall 25.xlsx')
+    # df2 = read_from_file('src/schedule.xlsx')
+    df3 = read_from_file('src/MAPS 202620 9.12.xlsx')
+
