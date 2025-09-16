@@ -8,7 +8,7 @@ from generateoutput import generate_reports, room_excel, instructor_excel
 
 
 def main():
-    st.title("ATU MAPS Class Schedule Processor beta 0.3.1")
+    st.title("ATU MAPS Class Schedule Processor beta 0.3.2")
     st.markdown('You may need to manually add a column called `Cross-List`')
     uploaded_file = st.file_uploader("Upload Excel file", type=['xlsx', 'xls'])
     
