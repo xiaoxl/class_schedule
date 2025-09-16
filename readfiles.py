@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime, time
-
+import os
 
 def parse_time(s):
     if not pd.isna(s):
@@ -116,10 +116,12 @@ def clean_df(df):
 
 
 def read_from_file(filename):
-    if isinstance(filename, str):
-        fileext = filename.split('.')[-1]
-    else:
-        fileext = filename.name.split('.')[-1]
+    
+    fileext = os.path.splitext(str(filename))[-1].lstrip('.')
+    # if isinstance(filename, str):
+    #     fileext = filename.split('.')[-1]
+    # else:
+    #     fileext = filename.name.split('.')[-1]
     if  fileext in ['xlsx', 'xls']:
         df = pd.read_excel(filename)
     elif fileext == 'csv':
