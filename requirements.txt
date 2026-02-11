@@ -1,4 +1,4 @@
 pandas
-streamlit==1.19.0
+streamlit>=1.41.0
 openpyxl
 ipython
