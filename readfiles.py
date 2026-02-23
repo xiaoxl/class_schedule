@@ -55,7 +55,7 @@ def read_from_ad(df):
     sf['Beginning Time'] = df['Start Time'].apply(parse_time)
     sf['Ending Time'] = df['End Time'].apply(parse_time)
     sf['Room'] = df['Room']
-    sf['Credits'] = sf['Number'].str[-1].astype(int)
+    sf['Credits'] = sf['Number'].astype(str).str[-1].astype(int)
     sf['Cross-List'] = df['Cross-List']
     if 'Catalog Title' in df.columns:
         sf['Title'] = df['Catalog Title']
