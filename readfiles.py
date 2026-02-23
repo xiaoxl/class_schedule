@@ -86,7 +86,7 @@ def read_from_argos(df):
     if 'Course Credit Hours' in df.columns:
         sf['Credits'] = df['Course Credit Hours'].copy().astype(int)
     else:
-        sf['Credits'] = df['Number'].astype(str).str[-1].astype(int)
+        sf['Credits'] = df['Number'].str[-1].astype(int)
     if 'Cross-List' in df.columns:
         sf['Cross-List'] = df['Cross-List']
     else:
@@ -128,6 +128,7 @@ def read_from_file(filename):
     elif fileext == 'csv':
         df = pd.read_csv(filename)
 
+    df = df.dropna(how='all')
     if 'Course/Section' in df.columns:
         sf = read_from_ad(df)
     else:
